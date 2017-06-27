@@ -28,8 +28,7 @@ wire slv1_cmd;
 wire slv1_req;
 wire [31:0]  slv1_wdata;
                 
-cross_bar i1 (
-// port map - connection between master ports and signals/registers   
+cross_bar i1 (   
 	.ack0(ack0),
 	.ack1(ack1),
 	.addr0(addr0),
@@ -85,33 +84,15 @@ cmd0=1'b1;
 cmd1=1'b1;
 req0=1'b1;
 req1=1'b1;
-addr0=32'h00001000;
-addr1=32'hA0000000;
+addr0=32'hA0001000;
+addr1=32'h00000100;
 wdata0=32'h11111111;
 wdata1=32'h22222222;
 reset=1'b1;
 
-forever #5 clk=!clk; 
+forever #5 clk=!clk; //set clk
 end  
-                                                        
-/*initial begin                                                                                                 
-forever #120 addr0=~addr0;
-end
-initial begin                                                                                                 
-forever #120 addr1=~addr1;
-end
-initial begin
-forever #30 cmd0=!cmd0;
-end
-initial begin
-forever #60 cmd1=!cmd1;
-end
-initial begin
-forever #10 req0=!req0;
-end
-initial begin
-forever #20 req1=!req1; 
-end*/
+
 //master0
 always@(posedge clk,posedge reset)
 begin
@@ -166,7 +147,7 @@ end
 
 initial begin
 #10; reset = 1'b0;
-#500; 
+#500; //end simulation
 $display("Simulation ended succesfully");
 $stop;                                                   
 end                                                    

@@ -15,20 +15,8 @@ reg [31:0] data;
 reg [31:0] rdata;
 reg [31:0] addr_;
 
-//generator front for ack (we cant if (req) -> ack <= 1'b1)
-/*reg req_tr;
-always@(posedge clk, posedge reset)
-begin
-if (reset) begin
-	req_tr <= 1'b0;
-	ack <= 1'b0;
-end
-else begin  
-req_tr <= req;
-ack <= req_tr & !req;
-end
-end*/
-
+//simple slave, compare address to detect req (if req in "1" all time) 
+//(next req must have diffrent address)
 always@(posedge clk, posedge reset)
 begin
 	if(reset) begin
@@ -53,11 +41,11 @@ begin
 	else ack <= 1'b0;
 end
 
-//delay 1 clk rdata
+//delay 1 clk rdata (send after ack)
 always@(posedge clk, posedge reset)
 begin
 if (reset)
-	rdata_tr<=1'b0;
+	rdata_tr<=32'b0;
 else 
 	rdata_tr <= rdata;
 end

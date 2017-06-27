@@ -1,5 +1,5 @@
 module cross_bar
-#(parameter N=31)//size bus
+#(parameter N=31)//size bus address/data (N+1)
 (
 	input clk, 
 	input reset,
@@ -48,14 +48,14 @@ module cross_bar
 wire [1:0] arb_num_master0, arb_num_master1;
 
 //arbiter for slave 0
-arbiter #(31,1'b0)
+arbiter #(1'b0)
 	a0(clk,(reset),(req0 & (~addr0[N])), (req1 & (~addr1[N])), slv0_ack, arb_num_master0); //addr[31]=0
 //a0(clk,(reset & ack0),(req0 & ~addr0[N]), (req1 & ~addr1[N]),arb_num_master0,arbiterNoQueue0);
 //arbiter for slave 1
-arbiter #(31,1'b1)
+arbiter #(1'b1)
 	a1(clk,(reset),(req0 & (addr0[N])), (req1 & (addr1[N])), slv1_ack, arb_num_master1); //addr[31]=1
 
-//if have to save req from masters0 and master1 (while work arbiter) - D trigger
+//saving req from masters0 and master1 - D trigger
 reg req0_tr;
 reg [N:0] addr0_tr;
 reg cmd0_tr;
@@ -88,23 +88,24 @@ else begin
 end
 end
 
-//choose which req's master slave process
-//data to slave0
+//choose which req's master slave have to process
 
 always@(posedge clk, posedge reset)
 begin
 if (reset) begin
+	//req to slave0
 	slv0_req <= 1'b0;
 	slv0_addr <= {(N+1){1'b0}};
 	slv0_cmd <= 1'b0;
 	slv0_wdata <= {(N+1){1'b0}};
-	//data to slave1
+	//req to slave1
 	slv1_req<=1'b0;
 	slv1_addr <= {(N+1){1'b0}};
 	slv1_cmd <= 1'b0;
 	slv1_wdata <= {(N+1){1'b0}};
 	end
 else begin
+	//req to slave0
 	slv0_req <= (arb_num_master0 == 2'b01) ? req0_tr : ((arb_num_master0 == 2'b10) ? req1_tr : slv0_req);
 	slv0_addr <= (arb_num_master0 == 2'b01) ? addr0_tr : ((arb_num_master0 == 2'b10) ? addr1_tr : slv0_addr);
 	slv0_cmd <= (arb_num_master0 == 2'b01) ? cmd0_tr : ((arb_num_master0 == 2'b10) ? cmd1_tr : slv0_cmd);
@@ -114,9 +115,10 @@ else begin
 	slv1_addr <= (arb_num_master1 == 2'b01) ? addr0_tr : ((arb_num_master1 == 2'b10) ? addr1_tr : slv1_addr);
 	slv1_cmd <= (arb_num_master1 == 2'b01) ? cmd0_tr : ((arb_num_master1 == 2'b10) ? cmd1_tr : slv1_cmd);
 	slv1_wdata <= (arb_num_master1 == 2'b01) ? wdata0_tr : ((arb_num_master1 == 2'b10) ? wdata1_tr : slv1_wdata);
+	end
 end
-end
-//D trigger for save decision arbiter	
+
+//D trigger for save decision arbiter	(3 triggers - 1 for arbiter, 2 - ack, 3 - rdata)
 reg [1:0] arb_num_master0_tr;	
 reg [1:0] arb_num_master1_tr;
 always@(posedge clk,posedge reset)
@@ -130,7 +132,7 @@ else begin
 	arb_num_master1_tr<=arb_num_master1;
 end
 end
-
+//2nd trigger
 reg [1:0] arb_num_master0_tr2;	
 reg [1:0] arb_num_master1_tr2;
 always@(posedge clk,posedge reset)
@@ -144,7 +146,7 @@ arb_num_master0_tr2<=arb_num_master0_tr;
 arb_num_master1_tr2<=arb_num_master1_tr;
 end
 end
-
+//3rd trigger
 reg [1:0] arb_num_master0_tr3;	
 reg [1:0] arb_num_master1_tr3;
 always@(posedge clk,posedge reset)
@@ -161,7 +163,7 @@ end
 
 
 
-//choose which slave work for which master (arb_num_master0=0 for master0, arb_num_master0!=arb_num_master1)
+//choose which slave work for which master 
 //for ack
 always@(posedge clk,posedge reset)
 begin
@@ -175,7 +177,7 @@ else begin
 end
 end
 
-//for data
+//for rdata
 always@(posedge clk,posedge reset)
 begin
 if (reset) begin
