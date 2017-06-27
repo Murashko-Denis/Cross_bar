@@ -50,7 +50,6 @@ wire [1:0] arb_num_master0, arb_num_master1;
 //arbiter for slave 0
 arbiter #(1'b0)
 	a0(clk,(reset),(req0 & (~addr0[N])), (req1 & (~addr1[N])), slv0_ack, arb_num_master0); //addr[31]=0
-//a0(clk,(reset & ack0),(req0 & ~addr0[N]), (req1 & ~addr1[N]),arb_num_master0,arbiterNoQueue0);
 //arbiter for slave 1
 arbiter #(1'b1)
 	a1(clk,(reset),(req0 & (addr0[N])), (req1 & (addr1[N])), slv1_ack, arb_num_master1); //addr[31]=1
@@ -106,12 +105,12 @@ if (reset) begin
 	end
 else begin
 	//req to slave0
-	slv0_req <= (arb_num_master0 == 2'b01) ? req0_tr : ((arb_num_master0 == 2'b10) ? req1_tr : slv0_req);
+	slv0_req <= (arb_num_master0 == 2'b01) ? req0_tr : ((arb_num_master0 == 2'b10) ? req1_tr : 1'b0); //1'b0 - no req
 	slv0_addr <= (arb_num_master0 == 2'b01) ? addr0_tr : ((arb_num_master0 == 2'b10) ? addr1_tr : slv0_addr);
 	slv0_cmd <= (arb_num_master0 == 2'b01) ? cmd0_tr : ((arb_num_master0 == 2'b10) ? cmd1_tr : slv0_cmd);
 	slv0_wdata <= (arb_num_master0 == 2'b01) ? wdata0_tr : ((arb_num_master0 == 2'b10) ? wdata1_tr : slv0_wdata);
 	//data to slave1
-	slv1_req <= (arb_num_master1 == 2'b01) ? req0_tr : ((arb_num_master1 == 2'b10) ? req1_tr : slv1_req);
+	slv1_req <= (arb_num_master1 == 2'b01) ? req0_tr : ((arb_num_master1 == 2'b10) ? req1_tr : 1'b0); //1'b0 - no req
 	slv1_addr <= (arb_num_master1 == 2'b01) ? addr0_tr : ((arb_num_master1 == 2'b10) ? addr1_tr : slv1_addr);
 	slv1_cmd <= (arb_num_master1 == 2'b01) ? cmd0_tr : ((arb_num_master1 == 2'b10) ? cmd1_tr : slv1_cmd);
 	slv1_wdata <= (arb_num_master1 == 2'b01) ? wdata0_tr : ((arb_num_master1 == 2'b10) ? wdata1_tr : slv1_wdata);
@@ -160,7 +159,6 @@ arb_num_master0_tr3<=arb_num_master0_tr2;
 arb_num_master1_tr3<=arb_num_master1_tr2;
 end
 end
-
 
 
 //choose which slave work for which master 

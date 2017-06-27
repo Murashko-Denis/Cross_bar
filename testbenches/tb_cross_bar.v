@@ -99,12 +99,12 @@ begin
 if (reset) begin
 	req0 <= 1'b1;
 	addr0 <=32'hA0001000;
-	cmd0 <= 1'b0;
+	cmd0 <= 1'b1;
 	wdata0 <= 32'h11111111;
 	
 end
 else if (ack0) begin
-	req0 <= 1'b1;
+	req0 <= 1'b0;
 	cmd0 <= !cmd0;
 	addr0 <= addr0+32'h80000001;
 	if (!cmd0)
@@ -128,7 +128,7 @@ if (reset) begin
 	wdata1 <= 32'h22222222;
 end
 else if (ack1) begin
-	req1 <= 1'b1;
+	req1 <= 1'b0;
 	addr1 <= addr1+32'hA0000001;
 	cmd1 <= !cmd1;
 	if (!cmd1)
